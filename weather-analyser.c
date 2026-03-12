@@ -76,6 +76,10 @@ void process_arg(int argc, char *argv[])
         {
             version(stdout);
         }
+        if (strcmp(argv[i], "--help") == 0)
+        {
+            help(stdout);
+        }
     }
 }
 
