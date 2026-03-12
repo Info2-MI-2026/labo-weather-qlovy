@@ -12,10 +12,10 @@ BraceWrapping:
     AfterEnum: true
     AfterUnion: true
     AfterStruct: true
-    AfterFunction: true
-    AfterControlStatement: true
+    AfterFunction: false
+    AfterControlStatement: false
     AfterNamespace: true
-    BeforeElse: true
+    BeforeElse: false
     BeforeCatch: true
     AfterExternBlock: true
     SplitEmptyFunction: false
