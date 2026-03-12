@@ -71,7 +71,7 @@ int collect_data(WData *data, FILE *fp) {
             }
             data->years[n1 - data->start].year = n1;
             data->years[n1 - data->start].months[n2 - 1].temperature = d1;
-            data->years[n1 - data->start].months[n2 - 1].temperature = d2;
+            data->years[n1 - data->start].months[n2 - 1].precipitations = d2;
         }
     }
     return 0;
@@ -86,11 +86,16 @@ void process_data(WData *data) {
             sum_precip += data->years[i].months[j].precipitations;
         }
         data->years[i].temperature = sum_temp/MONTHS;
-        data->years[i].temperature = sum_precip/MONTHS;
+        data->years[i].precipitations = sum_precip;
     }
 }
 
-void fprint_csv(FILE *fp, WData *data) {}
+void fprint_csv(FILE *fp, WData *data) {
+    for (int i=0; i<MAX_ENTRIES; i++){
+        if (data->years[i].year == 0) break;
+        fprintf(fp, "%d,%.1lf,%.1lf\n", data->years[i].year, data->years[i].temperature, data->years[i].precipitations);
+    }
+}
 
 void fprint_binary(FILE *fp, WData *data) {}
 
@@ -114,9 +119,16 @@ int main(int argc, char *argv[])
     process_arg(argc, argv);
     Options options;
     options.in_filename = "assets/weather-bern.txt";
+    options.out_filename = "output.csv";
     WData wdata1 = {0};
     FILE* f = fopen(options.in_filename, "r");
     if (f == NULL) return 1;
     collect_data(&wdata1, f);
+    fclose(f);
     process_data(&wdata1);
+
+    f = fopen(options.out_filename, "w");
+    if (f == NULL) return 1;
+    fprint_csv(f, &wdata1);
+    fclose(f);
 }
