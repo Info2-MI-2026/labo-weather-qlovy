@@ -34,7 +34,8 @@ typedef struct
 typedef struct
 {
     char *in_filename;
-    char *out_filename;
+    char *out_filename_csv;
+    char *out_filename_bin;
     bool binary_output;
 } Options;
 
@@ -97,7 +98,19 @@ void fprint_csv(FILE *fp, WData *data) {
     }
 }
 
-void fprint_binary(FILE *fp, WData *data) {}
+void fprint_binary(FILE *fp, WData *data) {
+    char* header = "WEATHER";
+    const int size = sizeof(header);
+    fwrite(header, size, 1, fp);
+    for(int i=0; i<MAX_ENTRIES; i++){
+        if (data->years[i].year == 0) break;
+        fwrite(&(data->years[i].year), 4, 1, fp);
+        int temp = data->years[i].temperature * 10;
+        fwrite(&temp, 4, 1, fp);
+        int precip = data->years[i].precipitations * 100;
+        fwrite(&precip, 4, 1, fp);
+    }
+}
 
 void process_arg(int argc, char *argv[])
 {
@@ -119,7 +132,9 @@ int main(int argc, char *argv[])
     process_arg(argc, argv);
     Options options;
     options.in_filename = "assets/weather-bern.txt";
-    options.out_filename = "output.csv";
+    options.out_filename_csv = "out.csv";
+    options.out_filename_bin = "out.bin";
+
     WData wdata1 = {0};
     FILE* f = fopen(options.in_filename, "r");
     if (f == NULL) return 1;
@@ -127,8 +142,13 @@ int main(int argc, char *argv[])
     fclose(f);
     process_data(&wdata1);
 
-    f = fopen(options.out_filename, "w");
+    f = fopen(options.out_filename_csv, "w");
     if (f == NULL) return 1;
     fprint_csv(f, &wdata1);
+    fclose(f);
+
+    f = fopen(options.out_filename_bin, "w");
+    if (f == NULL) return 1;
+    fprint_binary(f, &wdata1);
     fclose(f);
 }
