@@ -145,7 +145,8 @@ OPTIONS:
 
 --binary, -b   Output in binary mode, not CSV
 
--o<filename>   Write output on <filename> ```
+-o<filename>   Write output on <filename>
+```
 
 ### Sortie CSV
 
