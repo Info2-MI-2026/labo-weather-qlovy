@@ -6,3 +6,4 @@ weather-analyser
 *.d
 gmon.out
 app
+*.bin
