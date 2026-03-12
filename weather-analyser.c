@@ -60,9 +60,35 @@ void help(FILE *fp)
             "    -o<filename>   Write output on <filename>\n\n");
 }
 
-int collect_data(WData *data, FILE *fp) {}
+int collect_data(WData *data, FILE *fp) {
+    char txt[MAX_LINE];
+    while(fgets(txt, MAX_LINE, fp) != NULL){
+        int n1, n2;
+        double d1, d2;
+        if (sscanf(txt, "%d\t%d\t%lf\t%lf", &n1, &n2, &d1, &d2) == 4){
+            if (data->start == 0){
+                data->start = n1;
+            }
+            data->years[n1 - data->start].year = n1;
+            data->years[n1 - data->start].months[n2 - 1].temperature = d1;
+            data->years[n1 - data->start].months[n2 - 1].temperature = d2;
+        }
+    }
+    return 0;
+}
 
-void process_data(WData *data) {}
+void process_data(WData *data) {
+    for (int i=0 ; i<MAX_ENTRIES; i++){
+        double sum_temp = 0;
+        double sum_precip = 0;
+        for (int j=0; j<MONTHS; j++){
+            sum_temp += data->years[i].months[j].temperature;
+            sum_precip += data->years[i].months[j].precipitations;
+        }
+        data->years[i].temperature = sum_temp/MONTHS;
+        data->years[i].temperature = sum_precip/MONTHS;
+    }
+}
 
 void fprint_csv(FILE *fp, WData *data) {}
 
@@ -86,4 +112,11 @@ void process_arg(int argc, char *argv[])
 int main(int argc, char *argv[])
 {
     process_arg(argc, argv);
+    Options options;
+    options.in_filename = "assets/weather-bern.txt";
+    WData wdata1 = {0};
+    FILE* f = fopen(options.in_filename, "r");
+    if (f == NULL) return 1;
+    collect_data(&wdata1, f);
+    process_data(&wdata1);
 }
