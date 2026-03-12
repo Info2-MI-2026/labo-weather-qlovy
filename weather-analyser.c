@@ -9,6 +9,7 @@
 
 #define MONTHS 12        // Months in a year
 #define MAX_ENTRIES 512  // Maximum years in a file
+#define MAX_LINE 80
 
 typedef struct
 {
