@@ -10,6 +10,7 @@
 #define MONTHS 12        // Months in a year
 #define MAX_ENTRIES 512  // Maximum years in a file
 #define MAX_LINE 80
+#define MAX_LENGTH 40
 
 typedef struct
 {
@@ -33,9 +34,9 @@ typedef struct
 
 typedef struct
 {
-    char *in_filename;
-    char *out_filename_csv;
-    char *out_filename_bin;
+    char in_filename[MAX_LENGTH];
+    char out_filename_csv[MAX_LENGTH];
+    char out_filename_bin[MAX_LENGTH];
     bool binary_output;
 } Options;
 
@@ -112,29 +113,33 @@ void fprint_binary(FILE *fp, WData *data) {
     }
 }
 
-void process_arg(int argc, char *argv[])
+void process_arg(int argc, char *argv[], Options* options)
 {
-    for (int i = 1; i < argc; i++)
-    {
-        if (strcmp(argv[i], "--version") == 0)
-        {
+    for (int i = 1; i < argc; i++){
+        if (strcmp(argv[i], "--version") == 0){
             version(stdout);
-        }
-        if (strcmp(argv[i], "--help") == 0)
-        {
+        }else if (strcmp(argv[i], "--help") == 0){
             help(stdout);
+        }else if (strcmp(argv[i], "--binary") == 0 || strcmp(argv[i], "-b") == 0){
+            options->binary_output = true;
+        }else if(sscanf(argv[i], "-o%s", options->out_filename_csv) == 1){
+        }else{
+            sscanf(argv[i], "%s", options->in_filename);
         }
+    }
+    if (options->binary_output){
+        strcpy(options->out_filename_bin, options->out_filename_csv);
     }
 }
 
 int main(int argc, char *argv[])
 {
-    process_arg(argc, argv);
-    Options options;
-    options.in_filename = "assets/weather-bern.txt";
-    options.out_filename_csv = "out.csv";
-    options.out_filename_bin = "out.bin";
+    Options options = {.in_filename = "assets/weather-bern.txt", 
+        .out_filename_csv = "out.csv", .out_filename_bin = "out.bin",
+        .binary_output = false};
 
+    process_arg(argc, argv, &options);
+    
     WData wdata1 = {0};
     FILE* f = fopen(options.in_filename, "r");
     if (f == NULL) return 1;
@@ -142,13 +147,17 @@ int main(int argc, char *argv[])
     fclose(f);
     process_data(&wdata1);
 
-    f = fopen(options.out_filename_csv, "w");
-    if (f == NULL) return 1;
-    fprint_csv(f, &wdata1);
-    fclose(f);
+    if (options.binary_output){
+        f = fopen(options.out_filename_bin, "w");
+        if (f == NULL) return 2;
+        fprint_binary(f, &wdata1);
+        fclose(f);
+    }else{
+        f = fopen(options.out_filename_csv, "w");
+        if (f == NULL) return 3;
+        fprint_csv(f, &wdata1);
+        fclose(f);
+    }
 
-    f = fopen(options.out_filename_bin, "w");
-    if (f == NULL) return 1;
-    fprint_binary(f, &wdata1);
-    fclose(f);
+    return 0;
 }
