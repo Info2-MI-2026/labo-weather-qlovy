@@ -93,6 +93,7 @@ void process_data(WData *data) {
 }
 
 void fprint_csv(FILE *fp, WData *data) {
+    fprintf(fp, "year;temperatures;precipitations\n");
     for (int i=0; i<MAX_ENTRIES; i++){
         if (data->years[i].year == 0) break;
         fprintf(fp, "%d,%.1lf,%.1lf\n", data->years[i].year, data->years[i].temperature, data->years[i].precipitations);
